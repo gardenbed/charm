@@ -4,13 +4,14 @@
 package flagit
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/gardenbed/charm/internal/rflct"
 )
 
 const (
@@ -22,14 +23,6 @@ var (
 	flagNameRE = regexp.MustCompile(`^[A-Za-z]([0-9A-Za-z-.]*[0-9A-Za-z])?$`)
 	flagArgRE  = regexp.MustCompile("^-{1,2}[A-Za-z]([0-9A-Za-z-.]*[0-9A-Za-z])?")
 )
-
-type fieldInfo struct {
-	value reflect.Value
-	name  string
-	flag  string
-	help  string
-	sep   string
-}
 
 // flagValue implements the flag.Value interface.
 type flagValue struct {
@@ -45,7 +38,7 @@ func (v flagValue) String() string {
 }
 
 func (v flagValue) Set(val string) error {
-	if _, err := set(v.value, v.sep, val); err != nil {
+	if _, err := rflct.SetValue(v.value, v.sep, val); err != nil {
 		if v.continueOnError {
 			return nil
 		}
@@ -55,186 +48,12 @@ func (v flagValue) Set(val string) error {
 	return nil
 }
 
-func validateStruct(s interface{}) (reflect.Value, error) {
-	v := reflect.ValueOf(s) // reflect.Value --> v.Type(), v.Kind(), v.NumField()
-	t := reflect.TypeOf(s)  // reflect.Type --> t.Kind(), t.Name(), t.NumField()
-
-	// A pointer to a struct should be passed
-	if t.Kind() != reflect.Ptr {
-		return reflect.Value{}, errors.New("non-pointer type: you should pass a pointer to a struct type")
-	}
-
-	// Navigate to the pointer value
-	v = v.Elem()
-	t = t.Elem()
-
-	if t.Kind() != reflect.Struct {
-		return reflect.Value{}, errors.New("non-struct type: you should pass a pointer to a struct type")
-	}
-
-	return v, nil
-}
-
-func isTypeSupported(t reflect.Type) bool {
-	switch t.Kind() {
-	case reflect.String:
-		return true
-	case reflect.Bool:
-		return true
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return true
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return true
-	case reflect.Float32, reflect.Float64:
-		return true
-	case reflect.Ptr, reflect.Slice:
-		return isTypeSupported(t.Elem())
-	case reflect.Struct:
-		return isStructSupported(t)
-	default:
-		return false
-	}
-}
-
-func isStructSupported(t reflect.Type) bool {
-	return (t.PkgPath() == "net/url" && t.Name() == "URL") ||
-		(t.PkgPath() == "regexp" && t.Name() == "Regexp")
-}
-
-func isNestedStruct(t reflect.Type) bool {
-	if t.Kind() != reflect.Struct {
-		return false
-	}
-
-	if isStructSupported(t) {
-		return false
-	}
-
-	return true
-}
-
-func getFlagValue(flag string) string {
-	flagRegex := regexp.MustCompile("-{1,2}" + flag)
-
-	for i, arg := range os.Args {
-		if flagRegex.MatchString(arg) {
-			if s := strings.Index(arg, "="); s > 0 {
-				return arg[s+1:]
-			}
-
-			if i+1 < len(os.Args) {
-				if val := os.Args[i+1]; !flagArgRE.MatchString(val) {
-					return val
-				}
-			}
-
-			// For boolean flags
-			return "true"
-		}
-	}
-
-	return ""
-}
-
-func iterateOnFields(prefix string, vStruct reflect.Value, continueOnError bool, handle func(f fieldInfo) error) error {
-	// Iterate over struct fields
-	for i := 0; i < vStruct.NumField(); i++ {
-		v := vStruct.Field(i)        // reflect.Value       --> vField.Kind(), vField.Type().Name(), vField.Type().Kind(), vField.Interface()
-		t := v.Type()                // reflect.Type        --> t.Kind(), t.PkgPath(), t.Name(), t.NumField()
-		f := vStruct.Type().Field(i) // reflect.StructField --> f.Name, f.Type.Name(), f.Type.Kind(), f.Tag.Get(tag)
-
-		// Recursively, iterate on nested structs
-		// Nested structs do not need to have the `flag` tag and can be not settable.
-		if isNestedStruct(t) {
-			newPrefix := prefix + f.Tag.Get(flagTag)
-			if err := iterateOnFields(newPrefix, v, continueOnError, handle); err != nil {
-				return err
-			}
-			continue
-		}
-
-		// Skip unexported and unsupported fields
-		if !v.CanSet() || !isTypeSupported(t) {
-			continue
-		}
-
-		// `flag:"..."`
-		val := f.Tag.Get(flagTag)
-		if val == "" {
-			continue
-		}
-
-		var flagName, flagHelp string
-		if strings.Contains(val, ",") {
-			subs := strings.Split(val, ",")
-			flagName = subs[0]
-			flagHelp = subs[1]
-		} else {
-			flagName = val
-		}
-
-		// Apply prefix
-		flagName = prefix + flagName
-
-		// Sanitize the flag name
-		if !flagNameRE.MatchString(flagName) {
-			if continueOnError {
-				continue
-			}
-			return fmt.Errorf("invalid flag name: %s", flagName)
-		}
-
-		// `sep:"..."`
-		sep := f.Tag.Get(sepTag)
-		if sep == "" {
-			sep = ","
-		}
-
-		fi := fieldInfo{
-			value: v,
-			name:  f.Name,
-			flag:  flagName,
-			help:  flagHelp,
-			sep:   sep,
-		}
-
-		if err := handle(fi); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// Parse accepts the pointer to a struct type.
-// For those struct fields that have the flag tag, it will read values from command-line flags and parse them to the appropriate types.
-// This method does not use the built-in flag package for parsing and reading the flags.
-func Parse(s interface{}, continueOnError bool) error {
-	v, err := validateStruct(s)
-	if err != nil {
-		return err
-	}
-
-	return iterateOnFields("", v, continueOnError, func(f fieldInfo) error {
-		if val := getFlagValue(f.flag); val != "" {
-			if _, err := set(f.value, f.sep, val); err != nil {
-				if continueOnError {
-					return nil
-				}
-				return err
-			}
-		}
-
-		return nil
-	})
-}
-
 // Register accepts a flag set and the pointer to a struct type.
 // For those struct fields that have the flag tag, it will register a flag on the given flag set.
 // The current values of the struct fields will be used as default values for the registered flags.
 // Once the Parse method on the flag set is called, the values will be read, parsed to the appropriate types, and assigned to the corresponding struct fields.
 func Register(fs *flag.FlagSet, s interface{}, continueOnError bool) error {
-	v, err := validateStruct(s)
+	v, err := rflct.IsStructPtr(s)
 	if err != nil {
 		return err
 	}
@@ -287,4 +106,127 @@ func Register(fs *flag.FlagSet, s interface{}, continueOnError bool) error {
 
 		return nil
 	})
+}
+
+// Parse accepts the pointer to a struct type.
+// For those struct fields that have the flag tag, it will read values from command-line flags and parse them to the appropriate types.
+// This method does not use the built-in flag package for parsing and reading the flags.
+func Parse(s interface{}, continueOnError bool) error {
+	v, err := rflct.IsStructPtr(s)
+	if err != nil {
+		return err
+	}
+
+	return iterateOnFields("", v, continueOnError, func(f fieldInfo) error {
+		if val := getFlagValue(f.flag); val != "" {
+			if _, err := rflct.SetValue(f.value, f.sep, val); err != nil {
+				if continueOnError {
+					return nil
+				}
+				return err
+			}
+		}
+
+		return nil
+	})
+}
+
+type fieldInfo struct {
+	value reflect.Value
+	name  string
+	flag  string
+	help  string
+	sep   string
+}
+
+func iterateOnFields(prefix string, vStruct reflect.Value, continueOnError bool, handle func(fieldInfo) error) error {
+	// Iterate over struct fields
+	for i := 0; i < vStruct.NumField(); i++ {
+		v := vStruct.Field(i)        // reflect.Value       --> vField.Kind(), vField.Type().Name(), vField.Type().Kind(), vField.Interface()
+		t := v.Type()                // reflect.Type        --> t.Kind(), t.PkgPath(), t.Name(), t.NumField()
+		f := vStruct.Type().Field(i) // reflect.StructField --> f.Name, f.Type.Name(), f.Type.Kind(), f.Tag.Get(tag)
+
+		// Recursively, iterate on nested structs
+		// Nested structs do not need to have the `flag` tag and can be not settable.
+		if rflct.IsNestedStruct(t) {
+			newPrefix := prefix + f.Tag.Get(flagTag)
+			if err := iterateOnFields(newPrefix, v, continueOnError, handle); err != nil {
+				return err
+			}
+			continue
+		}
+
+		// Skip unexported and unsupported fields
+		if !v.CanSet() || !rflct.IsTypeSupported(t) {
+			continue
+		}
+
+		// `flag:"..."`
+		val := f.Tag.Get(flagTag)
+		if val == "" {
+			continue
+		}
+
+		var flagName, flagHelp string
+		if strings.Contains(val, ",") {
+			subs := strings.Split(val, ",")
+			flagName, flagHelp = subs[0], subs[1]
+		} else {
+			flagName = val
+		}
+
+		// Apply prefix
+		flagName = prefix + flagName
+
+		// Sanitize the flag name
+		if !flagNameRE.MatchString(flagName) {
+			if continueOnError {
+				continue
+			}
+			return fmt.Errorf("invalid flag name: %s", flagName)
+		}
+
+		// `sep:"..."`
+		sep := f.Tag.Get(sepTag)
+		if sep == "" {
+			sep = ","
+		}
+
+		fi := fieldInfo{
+			value: v,
+			name:  f.Name,
+			flag:  flagName,
+			help:  flagHelp,
+			sep:   sep,
+		}
+
+		if err := handle(fi); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func getFlagValue(flag string) string {
+	flagRegex := regexp.MustCompile("-{1,2}" + flag)
+
+	for i, arg := range os.Args {
+		if flagRegex.MatchString(arg) {
+			if s := strings.Index(arg, "="); s > 0 {
+				return arg[s+1:]
+			}
+
+			if i+1 < len(os.Args) {
+				if val := os.Args[i+1]; !flagArgRE.MatchString(val) {
+					return val
+				}
+			}
+
+			// For boolean flags
+			return "true"
+		}
+	}
+
+	return ""
 }

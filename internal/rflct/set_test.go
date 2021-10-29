@@ -1,4 +1,4 @@
-package flagit
+package rflct
 
 import (
 	"net/url"
@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/gardenbed/charm/internal/ptr"
 )
 
 func TestSetString(t *testing.T) {
@@ -805,19 +807,19 @@ func TestSetStringPtr(t *testing.T) {
 			"Nil",
 			nil, "new",
 			true, "",
-			stringPtr("new"),
+			ptr.String("new"),
 		},
 		{
 			"NewValue",
-			stringPtr("old"), "new",
+			ptr.String("old"), "new",
 			true, "",
-			stringPtr("new"),
+			ptr.String("new"),
 		},
 		{
 			"NoNewValue",
-			stringPtr("same"), "same",
+			ptr.String("same"), "same",
 			false, "",
-			stringPtr("same"),
+			ptr.String("same"),
 		},
 	}
 
@@ -851,25 +853,25 @@ func TestSetBoolPtr(t *testing.T) {
 			"Nil",
 			nil, "true",
 			true, "",
-			boolPtr(true),
+			ptr.Bool(true),
 		},
 		{
 			"NewValue",
-			boolPtr(false), "true",
+			ptr.Bool(false), "true",
 			true, "",
-			boolPtr(true),
+			ptr.Bool(true),
 		},
 		{
 			"NoNewValue",
-			boolPtr(true), "true",
+			ptr.Bool(true), "true",
 			false, "",
-			boolPtr(true),
+			ptr.Bool(true),
 		},
 		{
 			"InvalidValue",
-			boolPtr(false), "invalid",
+			ptr.Bool(false), "invalid",
 			false, `strconv.ParseBool: parsing "invalid": invalid syntax`,
-			boolPtr(false),
+			ptr.Bool(false),
 		},
 	}
 
@@ -903,25 +905,25 @@ func TestSetIntPtr(t *testing.T) {
 			"Nil",
 			nil, "9223372036854775807",
 			true, "",
-			intPtr(9223372036854775807),
+			ptr.Int(9223372036854775807),
 		},
 		{
 			"NewValue",
-			intPtr(-9223372036854775808), "9223372036854775807",
+			ptr.Int(-9223372036854775808), "9223372036854775807",
 			true, "",
-			intPtr(9223372036854775807),
+			ptr.Int(9223372036854775807),
 		},
 		{
 			"NoNewValue",
-			intPtr(9223372036854775807), "9223372036854775807",
+			ptr.Int(9223372036854775807), "9223372036854775807",
 			false, "",
-			intPtr(9223372036854775807),
+			ptr.Int(9223372036854775807),
 		},
 		{
 			"InvalidValue",
-			intPtr(-9223372036854775808), "invalid",
+			ptr.Int(-9223372036854775808), "invalid",
 			false, `strconv.ParseInt: parsing "invalid": invalid syntax`,
-			intPtr(-9223372036854775808),
+			ptr.Int(-9223372036854775808),
 		},
 	}
 
@@ -955,25 +957,25 @@ func TestSetInt8Ptr(t *testing.T) {
 			"Nil",
 			nil, "127",
 			true, "",
-			int8Ptr(127),
+			ptr.Int8(127),
 		},
 		{
 			"NewValue",
-			int8Ptr(-128), "127",
+			ptr.Int8(-128), "127",
 			true, "",
-			int8Ptr(127),
+			ptr.Int8(127),
 		},
 		{
 			"NoNewValue",
-			int8Ptr(127), "127",
+			ptr.Int8(127), "127",
 			false, "",
-			int8Ptr(127),
+			ptr.Int8(127),
 		},
 		{
 			"InvalidValue",
-			int8Ptr(-128), "invalid",
+			ptr.Int8(-128), "invalid",
 			false, `strconv.ParseInt: parsing "invalid": invalid syntax`,
-			int8Ptr(-128),
+			ptr.Int8(-128),
 		},
 	}
 
@@ -1007,25 +1009,25 @@ func TestSetInt16Ptr(t *testing.T) {
 			"Nil",
 			nil, "32767",
 			true, "",
-			int16Ptr(32767),
+			ptr.Int16(32767),
 		},
 		{
 			"NewValue",
-			int16Ptr(-32768), "32767",
+			ptr.Int16(-32768), "32767",
 			true, "",
-			int16Ptr(32767),
+			ptr.Int16(32767),
 		},
 		{
 			"NoNewValue",
-			int16Ptr(32767), "32767",
+			ptr.Int16(32767), "32767",
 			false, "",
-			int16Ptr(32767),
+			ptr.Int16(32767),
 		},
 		{
 			"InvalidValue",
-			int16Ptr(-32768), "invalid",
+			ptr.Int16(-32768), "invalid",
 			false, `strconv.ParseInt: parsing "invalid": invalid syntax`,
-			int16Ptr(-32768),
+			ptr.Int16(-32768),
 		},
 	}
 
@@ -1059,25 +1061,25 @@ func TestSetInt32Ptr(t *testing.T) {
 			"Nil",
 			nil, "2147483647",
 			true, "",
-			int32Ptr(2147483647),
+			ptr.Int32(2147483647),
 		},
 		{
 			"NewValue",
-			int32Ptr(-2147483648), "2147483647",
+			ptr.Int32(-2147483648), "2147483647",
 			true, "",
-			int32Ptr(2147483647),
+			ptr.Int32(2147483647),
 		},
 		{
 			"NoNewValue",
-			int32Ptr(2147483647), "2147483647",
+			ptr.Int32(2147483647), "2147483647",
 			false, "",
-			int32Ptr(2147483647),
+			ptr.Int32(2147483647),
 		},
 		{
 			"InvalidValue",
-			int32Ptr(-2147483648), "invalid",
+			ptr.Int32(-2147483648), "invalid",
 			false, `strconv.ParseInt: parsing "invalid": invalid syntax`,
-			int32Ptr(-2147483648),
+			ptr.Int32(-2147483648),
 		},
 	}
 
@@ -1111,25 +1113,25 @@ func TestSetInt64Ptr(t *testing.T) {
 			"Nil",
 			nil, "9223372036854775807",
 			true, "",
-			int64Ptr(9223372036854775807),
+			ptr.Int64(9223372036854775807),
 		},
 		{
 			"NewValue",
-			int64Ptr(-9223372036854775808), "9223372036854775807",
+			ptr.Int64(-9223372036854775808), "9223372036854775807",
 			true, "",
-			int64Ptr(9223372036854775807),
+			ptr.Int64(9223372036854775807),
 		},
 		{
 			"NoNewValue",
-			int64Ptr(9223372036854775807), "9223372036854775807",
+			ptr.Int64(9223372036854775807), "9223372036854775807",
 			false, "",
-			int64Ptr(9223372036854775807),
+			ptr.Int64(9223372036854775807),
 		},
 		{
 			"InvalidValue",
-			int64Ptr(-9223372036854775808), "invalid",
+			ptr.Int64(-9223372036854775808), "invalid",
 			false, `strconv.ParseInt: parsing "invalid": invalid syntax`,
-			int64Ptr(-9223372036854775808),
+			ptr.Int64(-9223372036854775808),
 		},
 	}
 
@@ -1163,25 +1165,25 @@ func TestSetInt64DurationPtr(t *testing.T) {
 			"Nil",
 			nil, "1m",
 			true, "",
-			durationPtr(time.Minute),
+			ptr.Duration(time.Minute),
 		},
 		{
 			"NewValue",
-			durationPtr(time.Second), "1m",
+			ptr.Duration(time.Second), "1m",
 			true, "",
-			durationPtr(time.Minute),
+			ptr.Duration(time.Minute),
 		},
 		{
 			"NoNewValue",
-			durationPtr(time.Minute), "1m",
+			ptr.Duration(time.Minute), "1m",
 			false, "",
-			durationPtr(time.Minute),
+			ptr.Duration(time.Minute),
 		},
 		{
 			"InvalidValue",
-			durationPtr(time.Second), "invalid",
+			ptr.Duration(time.Second), "invalid",
 			false, `time: invalid duration "invalid"`,
-			durationPtr(time.Second),
+			ptr.Duration(time.Second),
 		},
 	}
 
@@ -1215,25 +1217,25 @@ func TestSetUintPtr(t *testing.T) {
 			"Nil",
 			nil, "18446744073709551615",
 			true, "",
-			uintPtr(18446744073709551615),
+			ptr.Uint(18446744073709551615),
 		},
 		{
 			"NewValue",
-			uintPtr(0), "18446744073709551615",
+			ptr.Uint(0), "18446744073709551615",
 			true, "",
-			uintPtr(18446744073709551615),
+			ptr.Uint(18446744073709551615),
 		},
 		{
 			"NoNewValue",
-			uintPtr(18446744073709551615), "18446744073709551615",
+			ptr.Uint(18446744073709551615), "18446744073709551615",
 			false, "",
-			uintPtr(18446744073709551615),
+			ptr.Uint(18446744073709551615),
 		},
 		{
 			"InvalidValue",
-			uintPtr(0), "invalid",
+			ptr.Uint(0), "invalid",
 			false, `strconv.ParseUint: parsing "invalid": invalid syntax`,
-			uintPtr(0),
+			ptr.Uint(0),
 		},
 	}
 
@@ -1267,25 +1269,25 @@ func TestSetUint8Ptr(t *testing.T) {
 			"Nil",
 			nil, "255",
 			true, "",
-			uint8Ptr(255),
+			ptr.Uint8(255),
 		},
 		{
 			"NewValue",
-			uint8Ptr(0), "255",
+			ptr.Uint8(0), "255",
 			true, "",
-			uint8Ptr(255),
+			ptr.Uint8(255),
 		},
 		{
 			"NoNewValue",
-			uint8Ptr(255), "255",
+			ptr.Uint8(255), "255",
 			false, "",
-			uint8Ptr(255),
+			ptr.Uint8(255),
 		},
 		{
 			"InvalidValue",
-			uint8Ptr(0), "invalid",
+			ptr.Uint8(0), "invalid",
 			false, `strconv.ParseUint: parsing "invalid": invalid syntax`,
-			uint8Ptr(0),
+			ptr.Uint8(0),
 		},
 	}
 
@@ -1319,25 +1321,25 @@ func TestSetUint16Ptr(t *testing.T) {
 			"Nil",
 			nil, "65535",
 			true, "",
-			uint16Ptr(65535),
+			ptr.Uint16(65535),
 		},
 		{
 			"NewValue",
-			uint16Ptr(0), "65535",
+			ptr.Uint16(0), "65535",
 			true, "",
-			uint16Ptr(65535),
+			ptr.Uint16(65535),
 		},
 		{
 			"NoNewValue",
-			uint16Ptr(65535), "65535",
+			ptr.Uint16(65535), "65535",
 			false, "",
-			uint16Ptr(65535),
+			ptr.Uint16(65535),
 		},
 		{
 			"InvalidValue",
-			uint16Ptr(0), "invalid",
+			ptr.Uint16(0), "invalid",
 			false, `strconv.ParseUint: parsing "invalid": invalid syntax`,
-			uint16Ptr(0),
+			ptr.Uint16(0),
 		},
 	}
 
@@ -1371,25 +1373,25 @@ func TestSetUint32Ptr(t *testing.T) {
 			"Nil",
 			nil, "4294967295",
 			true, "",
-			uint32Ptr(4294967295),
+			ptr.Uint32(4294967295),
 		},
 		{
 			"NewValue",
-			uint32Ptr(0), "4294967295",
+			ptr.Uint32(0), "4294967295",
 			true, "",
-			uint32Ptr(4294967295),
+			ptr.Uint32(4294967295),
 		},
 		{
 			"NoNewValue",
-			uint32Ptr(4294967295), "4294967295",
+			ptr.Uint32(4294967295), "4294967295",
 			false, "",
-			uint32Ptr(4294967295),
+			ptr.Uint32(4294967295),
 		},
 		{
 			"InvalidValue",
-			uint32Ptr(0), "invalid",
+			ptr.Uint32(0), "invalid",
 			false, `strconv.ParseUint: parsing "invalid": invalid syntax`,
-			uint32Ptr(0),
+			ptr.Uint32(0),
 		},
 	}
 
@@ -1423,25 +1425,25 @@ func TestSetUint64Ptr(t *testing.T) {
 			"Nil",
 			nil, "18446744073709551615",
 			true, "",
-			uint64Ptr(18446744073709551615),
+			ptr.Uint64(18446744073709551615),
 		},
 		{
 			"NewValue",
-			uint64Ptr(0), "18446744073709551615",
+			ptr.Uint64(0), "18446744073709551615",
 			true, "",
-			uint64Ptr(18446744073709551615),
+			ptr.Uint64(18446744073709551615),
 		},
 		{
 			"NoNewValue",
-			uint64Ptr(18446744073709551615), "18446744073709551615",
+			ptr.Uint64(18446744073709551615), "18446744073709551615",
 			false, "",
-			uint64Ptr(18446744073709551615),
+			ptr.Uint64(18446744073709551615),
 		},
 		{
 			"InvalidValue",
-			uint64Ptr(0), "invalid",
+			ptr.Uint64(0), "invalid",
 			false, `strconv.ParseUint: parsing "invalid": invalid syntax`,
-			uint64Ptr(0),
+			ptr.Uint64(0),
 		},
 	}
 
@@ -1475,25 +1477,25 @@ func TestSetFloat32Ptr(t *testing.T) {
 			"Nil",
 			nil, "2.7182",
 			true, "",
-			float32Ptr(2.7182),
+			ptr.Float32(2.7182),
 		},
 		{
 			"NewValue",
-			float32Ptr(3.1415), "2.7182",
+			ptr.Float32(3.1415), "2.7182",
 			true, "",
-			float32Ptr(2.7182),
+			ptr.Float32(2.7182),
 		},
 		{
 			"NoNewValue",
-			float32Ptr(2.7182), "2.7182",
+			ptr.Float32(2.7182), "2.7182",
 			false, "",
-			float32Ptr(2.7182),
+			ptr.Float32(2.7182),
 		},
 		{
 			"InvalidValue",
-			float32Ptr(3.1415), "invalid",
+			ptr.Float32(3.1415), "invalid",
 			false, `strconv.ParseFloat: parsing "invalid": invalid syntax`,
-			float32Ptr(3.1415),
+			ptr.Float32(3.1415),
 		},
 	}
 
@@ -1527,25 +1529,25 @@ func TestSetFloat64Ptr(t *testing.T) {
 			"Nil",
 			nil, "2.7182818284",
 			true, "",
-			float64Ptr(2.7182818284),
+			ptr.Float64(2.7182818284),
 		},
 		{
 			"NewValue",
-			float64Ptr(3.14159265359), "2.7182818284",
+			ptr.Float64(3.14159265359), "2.7182818284",
 			true, "",
-			float64Ptr(2.7182818284),
+			ptr.Float64(2.7182818284),
 		},
 		{
 			"NoNewValue",
-			float64Ptr(2.7182818284), "2.7182818284",
+			ptr.Float64(2.7182818284), "2.7182818284",
 			false, "",
-			float64Ptr(2.7182818284),
+			ptr.Float64(2.7182818284),
 		},
 		{
 			"InvalidValue",
-			float64Ptr(3.14159265359), "invalid",
+			ptr.Float64(3.14159265359), "invalid",
 			false, `strconv.ParseFloat: parsing "invalid": invalid syntax`,
-			float64Ptr(3.14159265359),
+			ptr.Float64(3.14159265359),
 		},
 	}
 
@@ -2560,7 +2562,7 @@ func TestSetStructSliceRegexp(t *testing.T) {
 	}
 }
 
-func TestSet(t *testing.T) {
+func TestSetValue(t *testing.T) {
 	type Struct struct {
 		String        string
 		Bool          bool
@@ -2647,25 +2649,25 @@ func TestSet(t *testing.T) {
 		Byte:          0,
 		Rune:          -2147483648,
 		Duration:      time.Second,
-		StringPtr:     stringPtr("old"),
-		BoolPtr:       boolPtr(false),
-		IntPtr:        intPtr(-9223372036854775808),
-		Int8Ptr:       int8Ptr(-128),
-		Int16Ptr:      int16Ptr(-32768),
-		Int32Ptr:      int32Ptr(-2147483648),
-		Int64Ptr:      int64Ptr(-9223372036854775808),
-		UintPtr:       uintPtr(0),
-		Uint8Ptr:      uint8Ptr(0),
-		Uint16Ptr:     uint16Ptr(0),
-		Uint32Ptr:     uint32Ptr(0),
-		Uint64Ptr:     uint64Ptr(0),
-		Float32Ptr:    float32Ptr(3.1415),
-		Float64Ptr:    float64Ptr(3.14159265359),
+		StringPtr:     ptr.String("old"),
+		BoolPtr:       ptr.Bool(false),
+		IntPtr:        ptr.Int(-9223372036854775808),
+		Int8Ptr:       ptr.Int8(-128),
+		Int16Ptr:      ptr.Int16(-32768),
+		Int32Ptr:      ptr.Int32(-2147483648),
+		Int64Ptr:      ptr.Int64(-9223372036854775808),
+		UintPtr:       ptr.Uint(0),
+		Uint8Ptr:      ptr.Uint8(0),
+		Uint16Ptr:     ptr.Uint16(0),
+		Uint32Ptr:     ptr.Uint32(0),
+		Uint64Ptr:     ptr.Uint64(0),
+		Float32Ptr:    ptr.Float32(3.1415),
+		Float64Ptr:    ptr.Float64(3.14159265359),
 		URLPtr:        url1,
 		RegexpPtr:     re1,
-		BytePtr:       bytePtr(0),
-		RunePtr:       runePtr(-2147483648),
-		DurationPtr:   durationPtr(time.Second),
+		BytePtr:       ptr.Byte(0),
+		RunePtr:       ptr.Rune(-2147483648),
+		DurationPtr:   ptr.Duration(time.Second),
 		StringSlice:   []string{"old"},
 		BoolSlice:     []bool{false},
 		IntSlice:      []int{-2147483648},
@@ -2707,25 +2709,25 @@ func TestSet(t *testing.T) {
 		Byte:          255,
 		Rune:          2147483647,
 		Duration:      time.Minute,
-		StringPtr:     stringPtr("new"),
-		BoolPtr:       boolPtr(true),
-		IntPtr:        intPtr(9223372036854775807),
-		Int8Ptr:       int8Ptr(127),
-		Int16Ptr:      int16Ptr(32767),
-		Int32Ptr:      int32Ptr(2147483647),
-		Int64Ptr:      int64Ptr(9223372036854775807),
-		UintPtr:       uintPtr(18446744073709551615),
-		Uint8Ptr:      uint8Ptr(255),
-		Uint16Ptr:     uint16Ptr(65535),
-		Uint32Ptr:     uint32Ptr(4294967295),
-		Uint64Ptr:     uint64Ptr(18446744073709551615),
-		Float32Ptr:    float32Ptr(2.7182),
-		Float64Ptr:    float64Ptr(2.7182818284),
+		StringPtr:     ptr.String("new"),
+		BoolPtr:       ptr.Bool(true),
+		IntPtr:        ptr.Int(9223372036854775807),
+		Int8Ptr:       ptr.Int8(127),
+		Int16Ptr:      ptr.Int16(32767),
+		Int32Ptr:      ptr.Int32(2147483647),
+		Int64Ptr:      ptr.Int64(9223372036854775807),
+		UintPtr:       ptr.Uint(18446744073709551615),
+		Uint8Ptr:      ptr.Uint8(255),
+		Uint16Ptr:     ptr.Uint16(65535),
+		Uint32Ptr:     ptr.Uint32(4294967295),
+		Uint64Ptr:     ptr.Uint64(18446744073709551615),
+		Float32Ptr:    ptr.Float32(2.7182),
+		Float64Ptr:    ptr.Float64(2.7182818284),
 		URLPtr:        url2,
 		RegexpPtr:     re2,
-		BytePtr:       bytePtr(255),
-		RunePtr:       runePtr(2147483647),
-		DurationPtr:   durationPtr(time.Minute),
+		BytePtr:       ptr.Byte(255),
+		RunePtr:       ptr.Rune(2147483647),
+		DurationPtr:   ptr.Duration(time.Minute),
 		StringSlice:   []string{"new"},
 		BoolSlice:     []bool{true},
 		IntSlice:      []int{9223372036854775807},
@@ -2838,7 +2840,7 @@ func TestSet(t *testing.T) {
 				v := vStruct.Field(i)
 				f := vStruct.Type().Field(i)
 
-				updated, err := set(v, ",", tc.values[f.Name])
+				updated, err := SetValue(v, ",", tc.values[f.Name])
 
 				if tc.expectedError == "" {
 					assert.NoError(t, err)
