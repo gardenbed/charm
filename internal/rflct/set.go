@@ -1,4 +1,4 @@
-package flagit
+package rflct
 
 import (
 	"fmt"
@@ -828,7 +828,7 @@ func setStructSlice(v reflect.Value, vals []string) (bool, error) {
 	return false, fmt.Errorf("unsupported type: %s.%s", t.PkgPath(), t.Name())
 }
 
-func set(v reflect.Value, sep, val string) (bool, error) {
+func SetValue(v reflect.Value, sep, val string) (bool, error) {
 	switch v.Kind() {
 	case reflect.String:
 		return setString(v, val)
