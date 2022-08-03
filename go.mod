@@ -1,6 +1,6 @@
 module github.com/gardenbed/charm
 
-go 1.18
+go 1.19
 
 require (
 	github.com/mitchellh/cli v1.1.4
