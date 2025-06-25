@@ -1,3 +1,4 @@
+// Package askit provides functionality to prompt users for input in a command-line application.
 package askit
 
 import (

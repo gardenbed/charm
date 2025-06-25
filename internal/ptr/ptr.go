@@ -1,3 +1,4 @@
+// Package ptr provides utility functions to create pointers to basic types.
 package ptr
 
 import "time"

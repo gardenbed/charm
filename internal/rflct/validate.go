@@ -32,7 +32,7 @@ type (
 		Regexp   regexp.Regexp `flag:"regexp,the help text" ask:"any,regexp value"`
 	}
 
-	// Value is a helper type for testing purposes.
+	// Pointer is a helper type for testing purposes.
 	Pointer struct {
 		String   *string        `flag:"string-pointer" ask:"secret"`
 		Bool     *bool          `flag:"bool-pointer" ask:"any,bool pointer"`
@@ -55,7 +55,7 @@ type (
 		Regexp   *regexp.Regexp `flag:"regexp-pointer,the help text" ask:"any,regexp pointer"`
 	}
 
-	// Value is a helper type for testing purposes.
+	// Slice is a helper type for testing purposes.
 	Slice struct {
 		String   []string        `flag:"string-slice" ask:"any,string slice"`
 		Bool     []bool          `flag:"bool-slice" ask:"any,bool slice"`
@@ -78,7 +78,7 @@ type (
 		Regexp   []regexp.Regexp `flag:"regexp-slice,the help text" ask:"any,regexp slice"`
 	}
 
-	// Value is a helper type for testing purposes.
+	// Flags is a helper type for testing purposes.
 	Flags struct {
 		Unsupported    chan int
 		WithoutFlagTag string
