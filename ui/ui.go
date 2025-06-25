@@ -1,3 +1,4 @@
+// Package ui provides a user interface for command-line applications.
 package ui
 
 import (
@@ -63,7 +64,7 @@ func (u *ui) Printf(format string, a ...interface{}) {
 	defer u.Unlock()
 
 	s := fmt.Sprintf(format, a...)
-	fmt.Fprintln(u.writer, s)
+	_, _ = fmt.Fprintln(u.writer, s)
 }
 
 func (u *ui) GetLevel() Level {
@@ -86,7 +87,7 @@ func (u *ui) Tracef(style Style, format string, a ...interface{}) {
 
 	if u.level <= Trace {
 		s := style.sprintf(format, a...)
-		fmt.Fprintln(u.writer, s)
+		_, _ = fmt.Fprintln(u.writer, s)
 	}
 }
 
@@ -96,7 +97,7 @@ func (u *ui) Debugf(style Style, format string, a ...interface{}) {
 
 	if u.level <= Debug {
 		s := style.sprintf(format, a...)
-		fmt.Fprintln(u.writer, s)
+		_, _ = fmt.Fprintln(u.writer, s)
 	}
 }
 
@@ -106,7 +107,7 @@ func (u *ui) Infof(style Style, format string, a ...interface{}) {
 
 	if u.level <= Info {
 		s := style.sprintf(format, a...)
-		fmt.Fprintln(u.writer, s)
+		_, _ = fmt.Fprintln(u.writer, s)
 	}
 }
 
@@ -116,7 +117,7 @@ func (u *ui) Warnf(style Style, format string, a ...interface{}) {
 
 	if u.level <= Warn {
 		s := style.sprintf(format, a...)
-		fmt.Fprintln(u.writer, s)
+		_, _ = fmt.Fprintln(u.writer, s)
 	}
 }
 
@@ -126,6 +127,6 @@ func (u *ui) Errorf(style Style, format string, a ...interface{}) {
 
 	if u.level <= Error {
 		s := style.sprintf(format, a...)
-		fmt.Fprintln(u.errorWriter, s)
+		_, _ = fmt.Fprintln(u.errorWriter, s)
 	}
 }
